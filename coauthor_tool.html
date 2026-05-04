@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal Coauthor Tool</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    /* Brand palette — matches the logo */
+    --navy:#0c1e4a; --navy-mid:#13306b; --navy-light:#1a3f86;
+    --teal:#0891b2; --teal-dark:#0e7490; --teal-xdark:#0b5f77;
+    --teal-light:#22d3ee; --teal-50:#ecfeff; --teal-100:#cffafe; --teal-200:#a5f3fc;
+    --green:#16a34a; --green-light:#22c55e; --green-50:#f0fdf4; --green-100:#dcfce7;
+    --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0;
+    --slate-300:#cbd5e1; --slate-400:#94a3b8; --slate-500:#64748b;
+    --slate-600:#475569; --slate-700:#334155; --slate-800:#1e293b; --slate-900:#0f172a;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --shadow-md:0 4px 20px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.04);
+    --shadow-lg:0 10px 40px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.05);
+    --r:14px; --r-sm:9px; --r-xs:6px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    color:var(--slate-800);
+    background:#eaf2f5;
+    background-image:radial-gradient(circle,rgba(8,145,178,.12) 1px,transparent 1px);
+    background-size:26px 26px;
+    line-height:1.6;min-height:100vh;display:flex;flex-direction:column
+  }
+
+  /* ── Header ─────────────────────────────── */
+  header{
+    text-align:center;padding:44px 24px 68px;
+    background:linear-gradient(140deg,#060f24 0%,#0c1e4a 30%,#0d3a6e 60%,#0b6e8a 100%);
+    color:#fff;position:relative;overflow:hidden
+  }
+  header::before{
+    content:'';position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse at 15% 80%,rgba(34,211,238,.15) 0%,transparent 50%),
+      radial-gradient(ellipse at 82% 18%,rgba(8,145,178,.25) 0%,transparent 50%),
+      radial-gradient(ellipse at 50% 50%,rgba(22,163,74,.06) 0%,transparent 65%);
+    pointer-events:none
+  }
+  header::after{
+    content:'';position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
+    background-size:44px 44px;pointer-events:none
+  }
+  .header-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap}
+  .header-logo svg{filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
+  .header-text{text-align:left}
+  header h1{
+    font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;
+    background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,.82) 100%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+  }
+  header h1 span{
+    background:linear-gradient(135deg,#22d3ee,#67e8f9);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text
+  }
+  header p{font-size:.88rem;opacity:.7;max-width:420px;font-weight:400;line-height:1.75;margin-top:6px;-webkit-text-fill-color:rgba(255,255,255,.7)}
+  @media(max-width:700px){
+    .header-inner{flex-direction:column;gap:16px;text-align:center}
+    .header-text{text-align:center}
+  }
+
+  /* ── Layout ──────────────────────────────── */
+  .main-layout{
+    display:grid;grid-template-columns:448px 1fr;gap:24px;align-items:start;
+    max-width:1520px;margin:-36px auto 0;padding:0 24px 52px;
+    position:relative;z-index:1;flex:1
+  }
+  .left-panel,.right-panel{min-width:0}
+
+  /* ── Card ───────────────────────────────── */
+  .card{
+    background:#fff;border-radius:var(--r);
+    box-shadow:var(--shadow-md);
+    border:1px solid rgba(0,0,0,.045);padding:26px
+  }
+
+  /* ── Section titles ─────────────────────── */
+  .section-title{
+    font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--teal);margin-bottom:14px;
+    display:flex;align-items:center;gap:8px
+  }
+  .section-title::before{
+    content:'';width:3px;height:14px;flex-shrink:0;border-radius:2px;
+    background:linear-gradient(180deg,var(--teal),var(--teal-xdark))
+  }
+  .section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--slate-200),transparent)}
+  .section-divider{border:none;border-top:1px solid var(--slate-100);margin:20px 0}
+
+  /* ── Form ───────────────────────────────── */
+  label{display:block;font-size:.71rem;font-weight:600;margin-bottom:5px;color:var(--slate-600);text-transform:uppercase;letter-spacing:.05em}
+  input[type=text],input[type=number],textarea{
+    width:100%;padding:9px 13px;border:1.5px solid var(--slate-200);border-radius:var(--r-sm);
+    font-size:.875rem;font-family:inherit;
+    transition:border-color .15s,box-shadow .15s,background .15s;
+    background:var(--slate-50);color:var(--slate-800)
+  }
+  input:focus,textarea:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(8,145,178,.12)}
+  input.invalid{border-color:#ef4444;background:#fef2f2;box-shadow:0 0 0 3px rgba(239,68,68,.08)}
+  .hint{font-size:.7rem;color:var(--slate-400);margin-top:4px;line-height:1.5}
+  textarea{min-height:90px;resize:vertical;font-family:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;font-size:.78rem;line-height:1.6}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:110px}
+
+  /* ── Source options ─────────────────────── */
+  .source-option{
+    display:flex;align-items:flex-start;gap:11px;
+    padding:13px 15px;border:1.5px solid var(--slate-200);border-radius:11px;
+    margin-bottom:8px;transition:border-color .15s,background .15s,box-shadow .15s;cursor:pointer
+  }
+  .source-option:hover{border-color:var(--teal-200);background:var(--teal-50);box-shadow:0 2px 10px rgba(8,145,178,.08)}
+  .source-option.checked{
+    border-color:var(--teal);
+    background:linear-gradient(135deg,rgba(236,254,255,.9),rgba(207,250,254,.5));
+    box-shadow:0 2px 14px rgba(8,145,178,.14)
+  }
+  .source-option input[type=checkbox]{margin-top:3px;width:16px;height:16px;accent-color:var(--teal);cursor:pointer;flex-shrink:0}
+  .source-icon{
+    width:34px;height:34px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.9rem;flex-shrink:0;margin-top:0
+  }
+  .si-orcid{background:#dcfce7;color:#166534}
+  .si-scholar{background:#cffafe;color:#0e7490}
+  .si-doi{background:#fef3c7;color:#92400e}
+  .si-bibtex{background:#e0f2fe;color:#0c4a6e}
+  .source-label{font-weight:600;font-size:.875rem;color:var(--slate-800)}
+  .source-desc{font-size:.74rem;color:var(--slate-500);margin-top:2px;line-height:1.5}
+  .source-fields{margin-top:10px;display:none}
+  .source-option.checked .source-fields{display:block}
+
+  /* ── Year chips ─────────────────────────── */
+  .year-chips{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:7px}
+  .year-chip{
+    padding:6px 14px;border:1.5px solid var(--slate-200);border-radius:20px;
+    font-size:.78rem;font-weight:500;cursor:pointer;
+    transition:all .15s;background:#fff;color:var(--slate-600);font-family:inherit;line-height:1
+  }
+  .year-chip:hover{border-color:var(--teal-200);background:var(--teal-50);color:var(--teal-dark)}
+  .year-chip.active{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 2px 8px rgba(8,145,178,.35)}
+  .year-custom-wrap{display:inline-flex;align-items:center;gap:4px}
+  .year-custom-input{width:38px!important;padding:5px 4px!important;border-radius:20px!important;font-size:.78rem!important;text-align:center}
+  .year-custom-label{font-size:.74rem;color:var(--slate-500)}
+
+  /* ── Fetch button ───────────────────────── */
+  .fetch-wrap{text-align:center;margin-top:20px}
+  .btn{
+    padding:9px 22px;border:none;border-radius:var(--r-sm);
+    font-size:.84rem;font-weight:600;cursor:pointer;
+    transition:all .15s;white-space:nowrap;font-family:inherit;
+    letter-spacing:-.01em;display:inline-flex;align-items:center;gap:6px
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-primary{
+    background:linear-gradient(135deg,var(--teal),var(--teal-dark));color:#fff;
+    box-shadow:0 2px 10px rgba(8,145,178,.4),0 1px 3px rgba(8,145,178,.2)
+  }
+  .btn-primary:hover{
+    background:linear-gradient(135deg,#0a9fc4,#0b6e8a);
+    box-shadow:0 4px 20px rgba(8,145,178,.5),0 2px 6px rgba(8,145,178,.28);
+    transform:translateY(-1px)
+  }
+  .btn-primary:active{transform:translateY(0) scale(.98)}
+  .btn-primary:disabled{background:var(--slate-300);box-shadow:none;cursor:not-allowed;transform:none}
+  .btn-secondary{background:#fff;color:var(--slate-700);border:1.5px solid var(--slate-200);box-shadow:var(--shadow-sm)}
+  .btn-secondary:hover{background:var(--slate-50);border-color:var(--slate-300);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+  .btn-sm{padding:6px 13px;font-size:.78rem;border-radius:6px}
+
+  /* ── Status ─────────────────────────────── */
+  .status-bar{display:none;margin-top:14px}
+  .status-bar.active{display:block}
+  .progress-wrap{background:var(--slate-100);border-radius:8px;height:5px;overflow:hidden;margin-bottom:7px}
+  .progress-fill{
+    height:100%;border-radius:8px;width:0%;
+    transition:width .3s ease;
+    background:linear-gradient(90deg,var(--teal),var(--teal-light),var(--teal));
+    background-size:200% 100%;
+    animation:shimmer 1.8s infinite linear
+  }
+  @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+  .status-text{font-size:.74rem;color:var(--slate-500)}
+  .error-msg{
+    background:#fef2f2;border:1px solid #fecaca;color:#991b1b;
+    padding:12px 15px;border-radius:var(--r-sm);margin-top:12px;
+    display:none;font-size:.82rem;line-height:1.5
+  }
+  .error-msg.active{display:block}
+
+  /* ── Empty state ────────────────────────── */
+  .empty-state{text-align:center;padding:64px 24px;color:var(--slate-400)}
+  .empty-state .icon{
+    width:64px;height:64px;background:var(--slate-100);border-radius:18px;
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;font-size:1.8rem
+  }
+  .empty-state p{font-size:.875rem;line-height:1.75;max-width:290px;margin:0 auto}
+  .empty-state strong{color:var(--slate-600)}
+
+  /* ── Results header ─────────────────────── */
+  .results-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:15px;flex-wrap:wrap;gap:10px}
+  .results-header h2{font-size:1.05rem;font-weight:700;color:var(--slate-900)}
+  .results-stats{color:var(--slate-400);font-size:.77rem;margin-top:3px}
+  .download-btns{display:flex;gap:6px;flex-wrap:wrap}
+
+  /* ── Table ──────────────────────────────── */
+  .table-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--slate-200);box-shadow:var(--shadow-sm)}
+  .table-scroll{overflow-x:auto;max-height:72vh;overflow-y:auto}
+  table{width:100%;border-collapse:collapse;font-size:.8rem}
+  thead{background:var(--slate-50);position:sticky;top:0;z-index:1;border-bottom:2px solid var(--slate-200)}
+  th{
+    padding:10px 12px;text-align:left;font-weight:600;color:var(--slate-500);
+    cursor:pointer;user-select:none;white-space:nowrap;
+    font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;
+    transition:color .1s,background .1s
+  }
+  th:hover{background:var(--slate-100);color:var(--slate-700)}
+  th .sort-arrow{margin-left:3px;font-size:.6rem;color:var(--slate-400)}
+  th .sort-arrow.asc::after{content:'\25B2';color:var(--teal)}
+  th .sort-arrow.desc::after{content:'\25BC';color:var(--teal)}
+  td{padding:8px 12px;border-bottom:1px solid var(--slate-100);color:var(--slate-700);transition:background .1s}
+  td:first-child{color:var(--slate-400);font-size:.72rem;font-weight:500}
+  tbody tr:nth-child(even) td{background:#fafbfd}
+  tr:hover td{background:var(--teal-50)!important}
+  tr:last-child td{border-bottom:none}
+
+  /* ── Badges ─────────────────────────────── */
+  .src-badge{
+    display:inline-flex;align-items:center;
+    padding:2px 8px;border-radius:20px;
+    font-size:.61rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-right:2px
+  }
+  .src-orcid{background:#dcfce7;color:#166534}
+  .src-scholar{background:#cffafe;color:#0e7490}
+  .src-doi{background:#fef3c7;color:#92400e}
+  .src-bibtex{background:#e0f2fe;color:#0c4a6e}
+
+  /* ── DOE preview ────────────────────────── */
+  .doe-preview{display:none;margin-top:16px}
+  .doe-preview.active{display:block}
+  .doe-preview h3{margin-bottom:10px;font-size:.9rem;font-weight:700;color:var(--slate-900)}
+  .doe-preview pre{
+    background:var(--slate-50);padding:16px;border-radius:var(--r-sm);
+    font-size:.78rem;line-height:1.9;white-space:pre-wrap;
+    max-height:340px;overflow-y:auto;border:1px solid var(--slate-200);
+    font-family:'SFMono-Regular',Consolas,monospace;color:var(--slate-700)
+  }
+
+  /* ── Uncertainty ────────────────────────── */
+  tr.uncertain td{background:#fffbeb!important}
+  tr.uncertain:hover td{background:#fef3c7!important}
+  td.cell-warn{color:#92400e}
+  td.cell-missing{color:#d97706;font-style:italic}
+  .flag-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:middle}
+  .flag-dot.amber{background:#f59e0b}
+  .flag-dot.red{background:#ef4444}
+  .uncertain-legend{
+    display:flex;gap:14px;align-items:center;font-size:.7rem;color:var(--slate-500);
+    margin-top:10px;flex-wrap:wrap;padding:10px 14px;
+    background:var(--slate-50);border-radius:var(--r-xs);border:1px solid var(--slate-200)
+  }
+  .uncertain-legend .swatch{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:3px;vertical-align:middle}
+
+  /* ── Publications panel ─────────────────── */
+  .pub-panel{margin-top:16px}
+  .pub-toggle-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .pub-toggle-bar h2{font-size:1.05rem;font-weight:700;color:var(--slate-900)}
+  .pub-stats{color:var(--slate-400);font-size:.77rem;margin-top:3px}
+  .pub-table-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--slate-200);box-shadow:var(--shadow-sm)}
+  .pub-table-scroll{overflow-x:auto;max-height:50vh;overflow-y:auto}
+  .pub-table-scroll table{width:100%;border-collapse:collapse;font-size:.78rem}
+  .pub-table-scroll th{
+    padding:9px 12px;text-align:left;font-weight:600;color:var(--slate-500);
+    border-bottom:2px solid var(--slate-200);font-size:.67rem;text-transform:uppercase;letter-spacing:.07em;
+    background:var(--slate-50);position:sticky;top:0;z-index:1;cursor:pointer;user-select:none;white-space:nowrap
+  }
+  .pub-table-scroll th:hover{background:var(--slate-100)}
+  .pub-table-scroll td{padding:7px 12px;border-bottom:1px solid var(--slate-100);color:var(--slate-700);vertical-align:top}
+  .pub-table-scroll tr:nth-child(even) td{background:#fafbfd}
+  .pub-table-scroll tr:hover td{background:var(--teal-50)!important}
+  .pub-table-scroll td.pub-title{max-width:400px;word-wrap:break-word}
+  .pub-table-scroll td.pub-authors{max-width:300px;word-wrap:break-word;font-size:.72rem;color:var(--slate-500)}
+  .pub-doi-link{color:var(--teal);text-decoration:none;font-size:.72rem}
+  .pub-doi-link:hover{text-decoration:underline}
+
+  /* ── Disclaimer ─────────────────────────── */
+  .disclaimer{
+    padding:13px 15px;background:#fffbeb;border:1px solid #fde68a;
+    border-radius:var(--r-sm);font-size:.7rem;color:#78350f;line-height:1.6;margin-top:14px
+  }
+  .disclaimer strong{font-weight:700}
+  .notice-box{
+    display:flex;gap:10px;align-items:flex-start;
+    margin-top:16px;padding:11px 13px;
+    background:#f0fdf9;border:1px solid #99f6e4;border-radius:var(--r-sm);
+    font-size:.7rem;color:#134e4a;line-height:1.55
+  }
+  .notice-box-icon{font-size:.95rem;flex-shrink:0;margin-top:1px}
+
+  /* ── Footer ─────────────────────────────── */
+  footer{
+    text-align:center;padding:24px 20px;
+    font-size:.73rem;color:var(--slate-400);
+    border-top:1px solid var(--slate-200);background:#fff
+  }
+  footer a{color:var(--teal);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+  .footer-author{font-weight:500;color:var(--slate-500);margin-bottom:4px}
+
+  @media(max-width:960px){
+    .main-layout{grid-template-columns:1fr;margin-top:-24px}
+    header{padding:36px 18px 48px}
+    header h1{font-size:1.6rem}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="header-logo">
+      <svg width="130" height="100" viewBox="0 0 130 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Browser / document window -->
+        <rect x="2" y="4" width="66" height="58" rx="6" stroke="rgba(255,255,255,0.85)" stroke-width="2.5"/>
+        <line x1="2" y1="17" x2="68" y2="17" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+        <circle cx="10" cy="10.5" r="2.2" fill="#4ade80"/>
+        <circle cx="18" cy="10.5" r="2.2" fill="#4ade80"/>
+        <circle cx="26" cy="10.5" r="2.2" fill="#22d3ee"/>
+        <!-- Document lines -->
+        <line x1="11" y1="27" x2="57" y2="27" stroke="rgba(255,255,255,0.55)" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="11" y1="36" x2="48" y2="36" stroke="rgba(255,255,255,0.42)" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="11" y1="45" x2="52" y2="45" stroke="rgba(255,255,255,0.3)" stroke-width="2.2" stroke-linecap="round"/>
+        <!-- Green shield (privacy / local processing) -->
+        <path d="M6 56 L6 70 Q6 78 14 81 Q22 78 22 70 L22 56 L14 52 Z" fill="#16a34a" opacity="0.92"/>
+        <path d="M9 65 L12.5 69 L19 61" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <!-- Person node — top (bright teal) -->
+        <circle cx="92" cy="16" r="11" fill="#22d3ee" opacity="0.95"/>
+        <circle cx="92" cy="11.5" r="4" fill="white"/>
+        <path d="M83 23 Q92 19 101 23" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <!-- Person node — bottom right (mid teal) -->
+        <circle cx="118" cy="52" r="10" fill="#0891b2" opacity="0.95"/>
+        <circle cx="118" cy="48" r="3.6" fill="white"/>
+        <path d="M110 58 Q118 54 126 58" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Person node — bottom left (dark teal) -->
+        <circle cx="72" cy="76" r="10" fill="#0e7490" opacity="0.92"/>
+        <circle cx="72" cy="72" r="3.6" fill="white"/>
+        <path d="M64 82 Q72 78 80 82" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <!-- Connection lines between nodes -->
+        <line x1="92" y1="27" x2="78" y2="66" stroke="rgba(255,255,255,0.35)" stroke-width="1.8"/>
+        <line x1="92" y1="27" x2="110" y2="42" stroke="rgba(255,255,255,0.35)" stroke-width="1.8"/>
+        <!-- Junction dot -->
+        <circle cx="85" cy="47" r="3.5" fill="rgba(255,255,255,0.5)"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>Proposal<br><span>Coauthor Tool</span></h1>
+      <p>Generate a proposal-ready coauthor and collaborator list.<br>All processing happens in your browser — no data leaves your device.</p>
+    </div>
+  </div>
+</header>
+
+<div class="main-layout">
+  <!-- Left Panel: Inputs -->
+  <div class="left-panel">
+    <div class="card">
+      <div class="section-title">Your Information</div>
+      <div class="row">
+        <div><label for="owner-first">First Name</label><input type="text" id="owner-first" placeholder="Min"></div>
+        <div><label for="owner-last">Last Name</label><input type="text" id="owner-last" placeholder="Chen"></div>
+      </div>
+      <div class="hint">Used to exclude yourself from the coauthor list.</div>
+
+      <hr class="section-divider">
+
+      <div class="section-title">Data Sources</div>
+      <p style="font-size:.77rem;color:var(--slate-500);margin-bottom:12px">Select one or more — results are merged automatically.</p>
+
+      <!-- ORCID -->
+      <div class="source-option" id="src-orcid" onclick="toggleSource(this,'orcid')">
+        <input type="checkbox" id="chk-orcid" onclick="event.stopPropagation()">
+        <div class="source-icon si-orcid">🔬</div>
+        <div style="flex:1">
+          <div class="source-label">ORCID</div>
+          <div class="source-desc">Fetch publications via your ORCID iD.</div>
+          <div class="source-fields" onclick="event.stopPropagation()">
+            <label for="orcid-input" style="margin-top:8px">ORCID iD</label>
+            <input type="text" id="orcid-input" placeholder="0000-0002-1825-0097">
+          </div>
+        </div>
+      </div>
+
+      <!-- Google Scholar -->
+      <div class="source-option" id="src-scholar" onclick="toggleSource(this,'scholar')">
+        <input type="checkbox" id="chk-scholar" onclick="event.stopPropagation()">
+        <div class="source-icon si-scholar">🎓</div>
+        <div style="flex:1">
+          <div class="source-label">Google Scholar</div>
+          <div class="source-desc">Paste your Google Scholar profile URL.</div>
+          <div class="source-fields" onclick="event.stopPropagation()">
+            <label for="scholar-input" style="margin-top:8px">Profile URL</label>
+            <input type="text" id="scholar-input" placeholder="https://scholar.google.com/citations?user=...">
+            <div class="hint">Go to your Google Scholar profile and copy the URL from the address bar.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOI Paste -->
+      <div class="source-option" id="src-doi" onclick="toggleSource(this,'doi')">
+        <input type="checkbox" id="chk-doi" onclick="event.stopPropagation()">
+        <div class="source-icon si-doi">🔗</div>
+        <div style="flex:1">
+          <div class="source-label">Paste DOIs</div>
+          <div class="source-desc">Paste DOIs to extract coauthor info from CrossRef.</div>
+          <div class="source-fields" onclick="event.stopPropagation()">
+            <label for="doi-input" style="margin-top:8px">DOI List</label>
+            <textarea id="doi-input" placeholder="One DOI per line:&#10;10.1038/s41558-025-02297-y&#10;10.1016/j.rse.2025.115149"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- BibTeX Paste -->
+      <div class="source-option" id="src-bibtex" onclick="toggleSource(this,'bibtex')">
+        <input type="checkbox" id="chk-bibtex" onclick="event.stopPropagation()">
+        <div class="source-icon si-bibtex">📝</div>
+        <div style="flex:1">
+          <div class="source-label">Paste BibTeX</div>
+          <div class="source-desc">Paste BibTeX from Google Scholar, Zotero, etc.</div>
+          <div class="source-fields" onclick="event.stopPropagation()">
+            <label for="bibtex-input" style="margin-top:8px">BibTeX</label>
+            <textarea id="bibtex-input" placeholder="@article{smith2024,&#10;  author = {Smith, John and Doe, Jane},&#10;  doi = {10.1234/example},&#10;  year = {2024}&#10;}" style="min-height:100px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <hr class="section-divider">
+
+      <div class="section-title">Year Filter</div>
+      <label>Include papers from last</label>
+      <div class="year-chips">
+        <button class="year-chip" data-years="1">1 yr</button>
+        <button class="year-chip" data-years="2">2 yr</button>
+        <button class="year-chip active" data-years="3">3 yr</button>
+        <button class="year-chip" data-years="4">4 yr</button>
+        <button class="year-chip" data-years="5">5 yr</button>
+        <div class="year-custom-wrap">
+          <input type="number" class="year-custom-input" id="year-custom" min="1" max="99" placeholder="N">
+          <span class="year-custom-label">yr</span>
+        </div>
+        <button class="year-chip" data-years="0">All</button>
+      </div>
+
+      <div class="fetch-wrap">
+        <button class="btn btn-primary" id="btn-fetch" onclick="runFetch()" style="padding:12px 48px;font-size:.92rem;border-radius:10px">
+          Fetch Coauthors
+        </button>
+      </div>
+
+      <div class="notice-box">
+        <span class="notice-box-icon">⚠️</span>
+        <span><strong>For informational use only.</strong> Output is derived from public APIs and may be incomplete or inaccurate. You are solely responsible for verifying all results before submitting to any funding agency or official document. The developer assumes no liability for errors or omissions.</span>
+      </div>
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+    <div class="status-bar" id="status-bar">
+      <div class="progress-wrap"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="status-text" id="status-text"></div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Results -->
+  <div class="right-panel">
+    <div class="card">
+      <div id="empty-state" class="empty-state">
+        <div class="icon">📄</div>
+        <p>Select data sources and click <strong>Fetch Coauthors</strong> to generate your collaborator list.</p>
+      </div>
+      <div id="results-section" style="display:none">
+        <div class="results-header">
+          <div>
+            <h2>Coauthors</h2>
+            <div class="results-stats" id="results-stats"></div>
+          </div>
+          <div class="download-btns">
+            <button class="btn btn-secondary btn-sm" onclick="downloadCSV()">↓ CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleDOEPreview()">DOE/NSF</button>
+            <button class="btn btn-secondary btn-sm" onclick="clearResults()">Clear</button>
+          </div>
+        </div>
+        <div class="table-wrap"><div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th onclick="sortTable(0)">#<span class="sort-arrow" id="sort-0"></span></th>
+              <th onclick="sortTable(1)">Last Name<span class="sort-arrow" id="sort-1"></span></th>
+              <th onclick="sortTable(2)">First Name<span class="sort-arrow" id="sort-2"></span></th>
+              <th onclick="sortTable(3)">Institution<span class="sort-arrow" id="sort-3"></span></th>
+              <th onclick="sortTable(4)">Last Year<span class="sort-arrow" id="sort-4"></span></th>
+              <th onclick="sortTable(5)">Papers<span class="sort-arrow" id="sort-5"></span></th>
+              <th onclick="sortTable(6)">Source<span class="sort-arrow" id="sort-6"></span></th>
+            </tr></thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div></div>
+        <div class="doe-preview" id="doe-preview">
+          <h3>DOE/NSF Collaborators List</h3>
+          <div style="display:flex;gap:6px;margin-bottom:10px">
+            <button class="btn btn-secondary btn-sm" onclick="copyDOEText()">Copy</button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadDOEText()">↓ Download .txt</button>
+          </div>
+          <pre id="doe-text"></pre>
+        </div>
+      </div>
+      <div class="disclaimer" id="disclaimer" style="display:none">
+        <strong>Disclaimer &amp; Limitation of Liability.</strong>
+        This tool is provided "as is," without warranty of any kind, express or implied, including but not limited to
+        warranties of merchantability, fitness for a particular purpose, or non-infringement.
+        Output is derived from third-party public APIs (ORCID, CrossRef, OpenAlex, Google Scholar) and may contain
+        inaccuracies, omissions, or errors — including incorrect author names, institutional affiliations, duplicate
+        entries, or missing collaborators.
+        <strong>The developer, the University of Wisconsin–Madison, and the Global Change and Agroecosystems Research Lab
+        accept no responsibility or liability</strong> for the accuracy, completeness, or fitness for purpose of the output,
+        nor for any decisions, submissions, or consequences arising from its use.
+        Users are solely responsible for independently reviewing and verifying all information before inclusion in any
+        grant proposal, federal application (NSF, DOE, NIH, etc.), or official document.
+        Use of this tool constitutes acceptance of these terms.
+      </div>
+    </div>
+
+    <!-- Publications panel -->
+    <div class="card pub-panel" id="pub-panel" style="display:none">
+      <div class="pub-toggle-bar">
+        <div>
+          <h2>Fetched Publications</h2>
+          <div class="pub-stats" id="pub-stats"></div>
+        </div>
+        <div class="download-btns">
+          <button class="btn btn-secondary btn-sm" onclick="downloadPubCSV()">↓ CSV</button>
+          <button class="btn btn-secondary btn-sm" onclick="collapsePubPanel()">Collapse</button>
+        </div>
+      </div>
+      <div class="pub-table-wrap"><div class="pub-table-scroll">
+        <table>
+          <thead><tr>
+            <th onclick="sortPubTable(0)">#<span class="sort-arrow" id="psort-0"></span></th>
+            <th onclick="sortPubTable(1)">Title<span class="sort-arrow" id="psort-1"></span></th>
+            <th onclick="sortPubTable(2)">Year<span class="sort-arrow" id="psort-2"></span></th>
+            <th onclick="sortPubTable(3)">Authors<span class="sort-arrow" id="psort-3"></span></th>
+            <th onclick="sortPubTable(4)">DOI<span class="sort-arrow" id="psort-4"></span></th>
+            <th onclick="sortPubTable(5)">Source<span class="sort-arrow" id="psort-5"></span></th>
+          </tr></thead>
+          <tbody id="pub-body"></tbody>
+        </table>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-author">Developed by <a href="https://globalchange.cals.wisc.edu/" target="_blank" rel="noopener">Min Chen</a> &middot; University of Wisconsin&ndash;Madison</div>
+  <div>Data from <a href="https://orcid.org">ORCID</a>, <a href="https://scholar.google.com">Google Scholar</a>, and <a href="https://www.crossref.org">CrossRef</a> public APIs.</div>
+</footer>
+
+<script>
+'use strict';
+
+// ════════════════ State ════════════════
+const authorDB = {};
+let coauthorList = [];
+let currentSort = { col: 1, asc: true };
+const ownerKeys = new Set();
+let selectedYears = 3;
+let allDOIs = new Set();
+let totalPapers = 0;
+
+// Publication tracking
+const publicationList = [];
+let pubSort = { col: 2, asc: false }; // default: sort by year desc
+
+// ════════════════ Source toggle ════════════════
+function toggleSource(el, id) {
+  const chk = document.getElementById('chk-' + id);
+  chk.checked = !chk.checked;
+  el.classList.toggle('checked', chk.checked);
+}
+document.querySelectorAll('.source-option input[type=checkbox]').forEach(chk => {
+  chk.addEventListener('change', () => chk.closest('.source-option').classList.toggle('checked', chk.checked));
+});
+
+// ════════════════ Year chips ════════════════
+document.querySelectorAll('.year-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedYears = parseInt(chip.dataset.years, 10);
+    document.getElementById('year-custom').value = '';
+  });
+});
+document.getElementById('year-custom').addEventListener('input', function() {
+  if (parseInt(this.value, 10) > 0) {
+    document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
+    selectedYears = parseInt(this.value, 10);
+  }
+});
+document.getElementById('year-custom').addEventListener('focus', function() {
+  document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
+});
+function getMinYear() {
+  const c = parseInt(document.getElementById('year-custom').value, 10);
+  const y = c > 0 ? c : selectedYears;
+  return y > 0 ? new Date().getFullYear() - y : 0;
+}
+
+// ════════════════ Name normalization & merging ════════════════
+function stripDiacritics(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+function parseName(given, family) {
+  let g = (given || '').trim(), f = (family || '').trim();
+  if (!f && g.includes(',')) { const p = g.split(',', 2); f = p[0].trim(); g = p[1].trim(); }
+  return { given: g, family: f };
+}
+
+function nameKey(given, family) {
+  const p = parseName(given, family);
+  const f = stripDiacritics(p.family).toLowerCase().replace(/[^a-z]/g, '');
+  const gC = stripDiacritics(p.given).replace(/\./g, ' ').replace(/-/g, ' ').trim();
+  const init = (gC.split(/\s+/)[0] || '').toLowerCase().charAt(0);
+  return f + '|' + init;
+}
+
+function setOwner(given, family) {
+  const k = nameKey(given, family);
+  if (k && k !== '|') ownerKeys.add(k);
+}
+
+/** Match a display_name to an existing authorDB key (handles multi-word last names) */
+function findAuthorKey(displayName) {
+  const parts = displayName.trim().split(/\s+/);
+  if (parts.length < 2) return null;
+  for (let n = 1; n <= Math.min(3, parts.length - 1); n++) {
+    const family = parts.slice(parts.length - n).join(' ');
+    const given = parts.slice(0, parts.length - n).join(' ');
+    const key = nameKey(given, family);
+    if (key && key !== '|' && authorDB[key]) return key;
+  }
+  const key2 = nameKey(parts.slice(1).join(' '), parts[0]);
+  if (key2 && key2 !== '|' && authorDB[key2]) return key2;
+  return null;
+}
+
+function mergeAuthor(given, family, affiliation, year, source, affSource, matchType) {
+  const p = parseName(given, family);
+  if (!p.family) return;
+  const key = nameKey(p.given, p.family);
+  if (!key || key === '|' || ownerKeys.has(key)) return;
+
+  if (!authorDB[key]) {
+    authorDB[key] = { given: p.given, family: p.family, institution: affiliation || '',
+      instSource: affSource || source, instYear: year || 0,
+      lastYear: year || 0, paperCount: 1, sources: new Set([source]),
+      matchType: matchType || 'crossref' };
+    return;
+  }
+  const a = authorDB[key];
+  if (p.given.replace(/\./g, '').length > a.given.replace(/\./g, '').length) a.given = p.given;
+  if (p.family.length > a.family.length) a.family = p.family;
+  // Upgrade matchType: crossref > title-search > gs-fallback
+  const MT = { crossref: 3, 'title-search': 2, 'gs-fallback': 1 };
+  if ((MT[matchType] || 0) > (MT[a.matchType] || 0)) a.matchType = matchType;
+
+  if (affiliation) {
+    const P = { openalex: 3, crossref: 2, bibtex: 1 };
+    if (year > a.instYear || (year === a.instYear && (P[affSource]||0) > (P[a.instSource]||0)) || !a.institution) {
+      a.institution = affiliation; a.instSource = affSource; a.instYear = year;
+    }
+  }
+  if (year > a.lastYear) a.lastYear = year;
+  a.paperCount++;
+  a.sources.add(source);
+}
+
+// ════════════════ Affiliation cleaning (CrossRef) ════════════════
+// Keep full affiliation (dept + institution), only strip addresses/location junk
+const _LOC_STATES = 'Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|North Carolina|North Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming';
+const _LOC_COUNTRIES = 'USA|U\\.?S\\.?A?\\.?|UK|United Kingdom|United States|Canada|China|Japan|Australia|Germany|France|India|Brazil|Netherlands|The Netherlands|Sweden|Finland|Switzerland|Singapore|New Zealand|South Korea|Republic of Korea|Malaysia|Norway|Denmark|Italy|Spain|Austria|Belgium|Ireland|Scotland|England|Wales|Czech Republic|Czechia|Poland|Portugal|Greece|Hungary|Romania|Russia|Taiwan|Thailand|Indonesia|Mexico|Chile|Colombia|Argentina|South Africa|Kenya|Nigeria|Egypt|Israel|Turkey|Saudi Arabia';
+const _LOC_RE = new RegExp('^(?:' + _LOC_STATES + '|' + _LOC_COUNTRIES + ')$', 'i');
+
+function cleanAffiliation(aff) {
+  if (!aff) return '';
+  let s = aff.trim();
+
+  // ── Decode & normalize ──
+  const _ta = document.createElement('textarea'); _ta.innerHTML = s; s = _ta.value;
+  s = s.replace(/[‐‑‒–—―−­]/g, '-');
+  s = s.replace(/\b[\w.+-]+@[\w.-]+\.\w{2,}\b/g, '');
+  s = s.replace(/^(?:Now|Currently|Formerly)\s+(?:at|with)\s+/i, '');
+  s = s.replace(/;+\s*$/, '').replace(/,\s*,/g, ',').replace(/\s{3,}/g, '  ').trim();
+  if (!s) return '';
+
+  // ── Remove location after double-space (city, state, zip, country) ──
+  let result = s.split(/\s{2,}/)[0].trim();
+
+  // ── Strip street addresses, zip codes, mail codes, PO boxes ──
+  result = result
+    .replace(/,?\s*\d+\s+[\w.]+\s+(?:Dr|Rd|Road|St|Street|Ave|Avenue|Blvd|Boulevard|Way|Lane|Ln|Ct|Circle|Place|Pl)\.?\b[^,]*/i, '')
+    .replace(/\b\d{5}(?:-\d{4})?\b/g, '')
+    .replace(/,?\s*[Mm]ail\s*code[:\s]*[\w.-]+/i, '')
+    .replace(/,?\s*P\.?O\.?\s*Box\s*\d+/i, '');
+
+  // ── Strip trailing location: peel off comma-separated tail segments ──
+  // Protects "University of Virginia" etc. by checking context before stripping
+  result = _stripTrailingLocation(result);
+
+  // ── Final cleanup ──
+  result = result.replace(/[,;\s]+$/, '').replace(/^\s*,\s*/, '').trim();
+  return result;
+}
+
+/** Peel trailing ", State", ", Country", ", City" from end, but stop if
+ *  the preceding text ends with "of"/"at" or is "University of [State]" */
+function _stripTrailingLocation(s) {
+  for (let i = 0; i < 4; i++) {
+    const m = s.match(/^(.+),\s*([^,]+?)\s*$/);
+    if (!m) break;
+    const pre = m[1].trimEnd(), tail = m[2].trim();
+
+    // Don't strip if preceded by "of" or "at" (part of institution name)
+    if (/\b(?:of|at)$/i.test(pre)) break;
+    // Don't strip if pre is "University of [State/Country]" (multi-campus like UC Berkeley)
+    if (/\bUniversity\s+of\s+\w+$/i.test(pre) && _LOC_RE.test(pre.match(/\w+$/)[0])) break;
+
+    // Don't strip if tail ends with an institution keyword (e.g. "Harvard University")
+    if (/(?:University|Institute|Laboratory|Laboratoire|College|School|Center|Centre|Hospital|Museum|Foundation|Corporation|Agency|Department|Division|Bureau)\s*$/i.test(tail)) break;
+    const isLoc = _LOC_RE.test(tail);
+    const isAbbr = /^[A-Z]{2}(?:\s+(?:USA?|Canada))?$/.test(tail);
+    const isCity = /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}$/.test(tail) && tail.length < 30;
+    if (isLoc || isAbbr || isCity) { s = pre; } else { break; }
+  }
+  return s;
+}
+
+// ════════════════ BibTeX parser ════════════════
+function parseBibTeX(text) {
+  const entries = [], re = /@\w+\s*\{[^@]*?\n\s*\}/gs, blocks = text.match(re) || [];
+  for (const block of blocks) {
+    const entry = {}, fre = /(\w+)\s*=\s*(?:\{((?:[^{}]|\{[^{}]*\})*)\}|"([^"]*)"|(\S+))/g;
+    let m; while ((m = fre.exec(block)) !== null) entry[m[1].toLowerCase()] = (m[2]||m[3]||m[4]||'').trim();
+    if (Object.keys(entry).length > 0) entries.push(entry);
+  }
+  return entries;
+}
+function parseBibTeXAuthors(str) {
+  if (!str) return [];
+  return str.split(/\s+and\s+/i).map(a => {
+    a = a.replace(/[{}]/g, '').trim();
+    if (a.includes(',')) { const [f,g] = a.split(',',2); return {family:f.trim(),given:(g||'').trim()}; }
+    const p = a.split(/\s+/); if (p.length===1) return {family:p[0],given:''};
+    const fam = p.pop(); return {family:fam,given:p.join(' ')};
+  }).filter(a => a.family);
+}
+
+// ════════════════ API calls ════════════════
+
+// ORCID
+async function orcidPerson(id) {
+  const r = await fetch(`https://pub.orcid.org/v3.0/${id}/person`,{headers:{Accept:'application/json'}});
+  if (!r.ok) throw new Error(`ORCID profile not found (HTTP ${r.status}).`);
+  const d = await r.json(), n = d.name||{};
+  return {given:(n['given-names']||{}).value||'',family:(n['family-name']||{}).value||''};
+}
+async function orcidWorks(id) {
+  const r = await fetch(`https://pub.orcid.org/v3.0/${id}/works`,{headers:{Accept:'application/json'}});
+  if (!r.ok) throw new Error(`Could not fetch ORCID works (HTTP ${r.status}).`);
+  const d = await r.json(), works = [];
+  for (const g of (d.group||[])) {
+    const s = (g['work-summary']||[])[0]; if (!s) continue;
+    const yr = s['publication-date']?.year ? parseInt(s['publication-date'].year.value,10) : null;
+    let doi = null; for (const e of ((g['external-ids']||s['external-ids']||{})['external-id']||[])) { if (e['external-id-type']==='doi'){doi=e['external-id-value'];break;} }
+    if (doi && yr) works.push({doi,year:yr});
+  }
+  return works;
+}
+
+// CrossRef
+async function crossrefAuthors(doi) {
+  const r = await fetch(`https://api.crossref.org/works/${encodeURIComponent(doi)}`);
+  if (!r.ok) return null;
+  const d = await r.json(), msg = d.message||{};
+  return {authors:msg.author||[], year:(msg['published-print']||msg['published-online']||{})['date-parts']?.[0]?.[0]||null,
+    title:(msg.title||[])[0]||''};
+}
+
+// CrossRef title search (for Google Scholar papers)
+async function crossrefSearchTitle(title) {
+  const r = await fetch(`https://api.crossref.org/works?query.title=${encodeURIComponent(title)}&rows=1&select=DOI,author,title,published-print,published-online`);
+  if (!r.ok) return null;
+  const d = await r.json();
+  const items = d.message?.items || [];
+  if (!items.length) return null;
+  const item = items[0];
+  // Verify title similarity
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+  const na = norm(title), nb = norm(item.title?.[0] || '');
+  if (na.length < 10 || nb.length < 10) return null;
+  // Compare first ~40 chars (enough to confirm identity)
+  const la = na.substring(0, Math.min(40, na.length));
+  const lb = nb.substring(0, Math.min(40, nb.length));
+  if (la !== lb) {
+    // Fallback: Jaccard word similarity
+    const wa = new Set(na.split(' ').filter(w => w.length > 2));
+    const wb = new Set(nb.split(' ').filter(w => w.length > 2));
+    if (!wa.size || !wb.size) return null;
+    let overlap = 0; wa.forEach(w => { if (wb.has(w)) overlap++; });
+    if (overlap / Math.max(wa.size, wb.size) < 0.5) return null;
+  }
+  return { doi: item.DOI, authors: item.author || [],
+    year: (item['published-print'] || item['published-online'])?.['date-parts']?.[0]?.[0] || null };
+}
+
+// ════════════════ Google Scholar ════════════════
+function extractGSUserId(url) {
+  try {
+    const u = new URL(url.includes('://') ? url : 'https://' + url);
+    return u.searchParams.get('user') || null;
+  } catch {
+    const m = url.match(/[?&]user=([^&]+)/);
+    return m ? m[1] : null;
+  }
+}
+
+async function fetchGSPage(userId, start) {
+  const gsUrl = `https://scholar.google.com/citations?user=${userId}&hl=en&cstart=${start}&pagesize=100&sortby=pubdate`;
+  const proxies = [
+    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
+  let lastErr = '';
+  for (const mkProxy of proxies) {
+    try {
+      const r = await fetch(mkProxy(gsUrl));
+      if (r.ok) {
+        const text = await r.text();
+        // Verify it's a valid GS page (not a CAPTCHA or error)
+        if (text.includes('gsc_a_t') || text.includes('gs_gray')) return text;
+        if (text.includes('CAPTCHA') || text.includes('captcha') || text.includes('unusual traffic')) {
+          lastErr = 'Google Scholar is showing a CAPTCHA.';
+          continue;
+        }
+      }
+    } catch (e) { lastErr = e.message; }
+  }
+  throw new Error(lastErr || 'Could not fetch Google Scholar page. Try using "Paste DOIs" or "Paste BibTeX" instead (export BibTeX from your Google Scholar profile).');
+}
+
+function parseGSHtml(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const papers = [];
+  for (const row of doc.querySelectorAll('tr.gsc_a_tr')) {
+    const title = row.querySelector('.gsc_a_at')?.textContent?.trim() || '';
+    const grays = row.querySelectorAll('.gs_gray');
+    const authorsStr = grays[0]?.textContent?.trim() || '';
+    const year = parseInt(row.querySelector('.gsc_a_y span')?.textContent?.trim() || '0', 10);
+    if (title) papers.push({ title, authorsStr, year });
+  }
+  return papers;
+}
+
+/** Parse abbreviated GS author string: "M Chen, J Smith, AK Johnson, ..." */
+function parseGSAuthors(authorsStr) {
+  return authorsStr.split(',').map(a => a.trim()).filter(a => a && a !== '...' && a !== '…').map(a => {
+    const parts = a.split(/\s+/);
+    if (parts.length === 1) return { given: '', family: parts[0] };
+    const family = parts.pop();
+    return { given: parts.join(' '), family };
+  });
+}
+
+async function fetchAllGSPapers(userId, minYear, statusCb) {
+  let all = [], start = 0;
+  while (true) {
+    if (statusCb) statusCb(`Fetching Google Scholar (papers ${start + 1}+)...`);
+    const html = await fetchGSPage(userId, start);
+    const papers = parseGSHtml(html);
+    if (!papers.length) break;
+    all = all.concat(papers);
+    if (papers.length < 20) break; // last page
+    start += papers.length;
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  if (minYear > 0) all = all.filter(p => p.year === 0 || p.year >= minYear);
+  return all;
+}
+
+// ════════════════ OpenAlex silent backfill ════════════════
+
+/** Batch-lookup DOIs on OpenAlex to backfill missing affiliations */
+async function openalexBackfillAffiliations(dois, statusCb) {
+  const doiList = [...dois];
+  const BATCH = 40;
+  let processed = 0;
+  for (let i = 0; i < doiList.length; i += BATCH) {
+    const batch = doiList.slice(i, i + BATCH);
+    const filter = batch.map(d => `doi:${d}`).join('|');
+    try {
+      const r = await fetch(`https://api.openalex.org/works?filter=${filter}&per_page=200&select=id,doi,publication_year,authorships&mailto=coauthor-tool@example.com`);
+      if (!r.ok) continue;
+      const d = await r.json();
+      for (const w of (d.results || [])) {
+        const year = w.publication_year || 0;
+        for (const as of (w.authorships || [])) {
+          const dn = as.author?.display_name || '';
+          if (!dn) continue;
+          const key = findAuthorKey(dn);
+          if (!key || ownerKeys.has(key)) continue;
+          const inst = (as.institutions || []).map(ii => ii.display_name).filter(Boolean)[0] || '';
+          if (inst && authorDB[key] && !authorDB[key].institution) {
+            authorDB[key].institution = inst;
+            authorDB[key].instSource = 'openalex';
+            authorDB[key].instYear = year;
+          } else if (inst && authorDB[key] && year > authorDB[key].instYear) {
+            if (3 >= ({ openalex: 3, crossref: 2 }[authorDB[key].instSource] || 0)) {
+              authorDB[key].institution = inst;
+              authorDB[key].instSource = 'openalex';
+              authorDB[key].instYear = year;
+            }
+          }
+        }
+      }
+    } catch (e) { /* skip */ }
+    processed += batch.length;
+    if (statusCb) statusCb(processed, doiList.length);
+    if (i + BATCH < doiList.length) await new Promise(r => setTimeout(r, 200));
+  }
+}
+
+/** For authors still missing affiliations, search OpenAlex by name */
+async function openalexAuthorBackfill(statusCb) {
+  const missing = Object.entries(authorDB).filter(([k, a]) => !a.institution);
+  if (!missing.length) return;
+  let done = 0;
+  for (const [key, author] of missing) {
+    const searchName = `${author.given} ${author.family}`.trim();
+    if (!searchName) { done++; continue; }
+    try {
+      const r = await fetch(`https://api.openalex.org/authors?search=${encodeURIComponent(searchName)}&per_page=5&mailto=coauthor-tool@example.com`);
+      if (r.ok) {
+        const d = await r.json();
+        for (const result of (d.results || [])) {
+          const rdn = result.display_name || '';
+          const rParts = rdn.split(/\s+/);
+          let matched = false;
+          for (let n = 1; n <= Math.min(3, rParts.length - 1); n++) {
+            if (nameKey(rParts.slice(0, rParts.length - n).join(' '), rParts.slice(rParts.length - n).join(' ')) === key) { matched = true; break; }
+          }
+          if (!matched && rParts.length >= 2) {
+            if (nameKey(rParts.slice(1).join(' '), rParts[0]) === key) matched = true;
+          }
+          if (matched) {
+            const inst = (result.last_known_institutions || []).map(i => i.display_name).filter(Boolean)[0] || '';
+            if (inst) {
+              author.institution = inst;
+              author.instSource = 'openalex';
+              author.instYear = author.lastYear;
+              break;
+            }
+          }
+        }
+      }
+    } catch (e) { /* skip */ }
+    done++;
+    if (statusCb) statusCb(done, missing.length);
+    if (done < missing.length) await new Promise(r => setTimeout(r, 150));
+  }
+}
+
+// ════════════════ Main fetch ════════════════
+async function runFetch() {
+  hideError();
+  const firstName = document.getElementById('owner-first').value.trim();
+  const lastName = document.getElementById('owner-last').value.trim();
+
+  const useOrcid = document.getElementById('chk-orcid').checked;
+  const useScholar = document.getElementById('chk-scholar').checked;
+  const useDOI = document.getElementById('chk-doi').checked;
+  const useBib = document.getElementById('chk-bibtex').checked;
+
+  if (!useOrcid && !useScholar && !useDOI && !useBib) return showError('Please select at least one data source.');
+
+  if ((useDOI || useBib || useScholar) && (!firstName || !lastName))
+    return showError('Please enter your first and last name to exclude yourself from the coauthor list.');
+
+  if (useOrcid) {
+    const id = document.getElementById('orcid-input').value.trim();
+    if (!/^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/.test(id)) {
+      document.getElementById('orcid-input').classList.add('invalid');
+      return showError('Please enter a valid ORCID iD (format: XXXX-XXXX-XXXX-XXXX).');
+    }
+    document.getElementById('orcid-input').classList.remove('invalid');
+  }
+  if (useScholar) {
+    const url = document.getElementById('scholar-input').value.trim();
+    if (!extractGSUserId(url)) {
+      document.getElementById('scholar-input').classList.add('invalid');
+      return showError('Please enter a valid Google Scholar profile URL (must contain ?user=...).');
+    }
+    document.getElementById('scholar-input').classList.remove('invalid');
+  }
+
+  if (firstName && lastName) setOwner(firstName, lastName);
+
+  const btn = document.getElementById('btn-fetch');
+  btn.disabled = true;
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('disclaimer').style.display = 'none';
+  document.getElementById('doe-preview').classList.remove('active');
+
+  for (const k in authorDB) delete authorDB[k];
+  allDOIs.clear();
+  publicationList.length = 0;
+  totalPapers = 0;
+  document.getElementById('pub-panel').style.display = 'none';
+
+  const minYear = getMinYear();
+
+  try {
+    // ── 1. ORCID ──
+    if (useOrcid) {
+      showStatus('Fetching ORCID profile...', 0);
+      const id = document.getElementById('orcid-input').value.trim();
+      const person = await orcidPerson(id);
+      setOwner(person.given, person.family);
+      if (!firstName) document.getElementById('owner-first').value = person.given;
+      if (!lastName) document.getElementById('owner-last').value = person.family;
+      showStatus(`ORCID: ${person.given} ${person.family}. Fetching works...`, 3);
+
+      let works = await orcidWorks(id);
+      if (minYear > 0) works = works.filter(w => w.year >= minYear);
+      if (works.length) {
+        totalPapers += works.length;
+        showStatus(`ORCID: fetching coauthors for ${works.length} papers...`, 5);
+        works.forEach(w => allDOIs.add(w.doi));
+        await processDOIList(works.map(w => ({doi:w.doi,year:w.year})), 'orcid', 5, 30);
+      }
+    }
+
+    // ── 2. Google Scholar ──
+    if (useScholar) {
+      showStatus('Fetching Google Scholar profile...', 31);
+      const userId = extractGSUserId(document.getElementById('scholar-input').value.trim());
+      const papers = await fetchAllGSPapers(userId, minYear, msg => showStatus(msg, 32));
+      totalPapers += papers.length;
+
+      if (papers.length) {
+        showStatus(`Google Scholar: looking up ${papers.length} papers on CrossRef...`, 35);
+        let done = 0, found = 0;
+        for (const paper of papers) {
+          try {
+            const cr = await crossrefSearchTitle(paper.title);
+            if (cr) {
+              found++;
+              if (cr.doi) allDOIs.add(cr.doi);
+              const year = paper.year || cr.year || 0;
+              const authorNames = cr.authors.map(a => `${a.given||''} ${a.family||''}`.trim()).join(', ');
+              addPublication(paper.title, year, cr.doi || '', authorNames, 'scholar');
+              for (const author of cr.authors) {
+                const family = author.family || '', given = author.given || '';
+                if (!family) continue;
+                const affs = (author.affiliation || []).map(a => a.name).filter(Boolean);
+                const best = affs.length > 0 ? affs.reduce((a,b) => a.length > b.length ? a : b) : '';
+                mergeAuthor(given, family, cleanAffiliation(best), year, 'scholar', 'crossref', 'title-search');
+              }
+            } else {
+              // Fallback: use abbreviated GS author names
+              addPublication(paper.title, paper.year || 0, '', paper.authorsStr, 'scholar');
+              const gsAuthors = parseGSAuthors(paper.authorsStr);
+              for (const a of gsAuthors) {
+                mergeAuthor(a.given, a.family, '', paper.year || 0, 'scholar', '', 'gs-fallback');
+              }
+            }
+          } catch (e) {
+            // Fallback on error too
+            addPublication(paper.title, paper.year || 0, '', paper.authorsStr, 'scholar');
+            const gsAuthors = parseGSAuthors(paper.authorsStr);
+            for (const a of gsAuthors) mergeAuthor(a.given, a.family, '', paper.year || 0, 'scholar', '', 'gs-fallback');
+          }
+          done++;
+          if (done % 5 === 0 || done === papers.length)
+            showStatus(`Google Scholar: ${done}/${papers.length} papers (${found} matched on CrossRef)...`, 35 + (done / papers.length) * 25);
+          if (done < papers.length) await new Promise(r => setTimeout(r, 300));
+        }
+      }
+    }
+
+    // ── 3. Paste DOIs ──
+    if (useDOI) {
+      const raw = document.getElementById('doi-input').value.trim();
+      const dois = raw.split(/[\n,]+/).map(l => {
+        let d = l.trim().replace(/^https?:\/\/(?:dx\.)?doi\.org\//i,'').replace(/^doi:\s*/i,'');
+        return d;
+      }).filter(d => d && /^10\.\d{4,}/.test(d));
+      if (dois.length) {
+        totalPapers += dois.length;
+        showStatus(`DOIs: fetching coauthors for ${dois.length} papers...`, 61);
+        dois.forEach(d => allDOIs.add(d));
+        await processDOIList(dois.map(d => ({doi:d,year:null})), 'doi', 61, 75, minYear);
+      }
+    }
+
+    // ── 4. Paste BibTeX ──
+    if (useBib) {
+      const raw = document.getElementById('bibtex-input').value.trim();
+      const entries = parseBibTeX(raw);
+      const withDoi = [], withoutDoi = [];
+      for (const e of entries) {
+        const year = parseInt(e.year,10)||0;
+        if (minYear > 0 && year > 0 && year < minYear) continue;
+        if (e.doi) {
+          const d = e.doi.replace(/^https?:\/\/(?:dx\.)?doi\.org\//i,'');
+          withDoi.push({doi:d,year,title:e.title||''}); allDOIs.add(d);
+        } else {
+          const authors = parseBibTeXAuthors(e.author);
+          const authStr = authors.map(a => `${a.given} ${a.family}`.trim()).join(', ');
+          addPublication(e.title || '', year, '', authStr, 'bibtex');
+          for (const a of authors) mergeAuthor(a.given, a.family, '', year, 'bibtex', 'bibtex', 'crossref');
+          withoutDoi.push(e);
+        }
+      }
+      totalPapers += withDoi.length + withoutDoi.length;
+      if (withDoi.length) {
+        showStatus(`BibTeX: fetching coauthors for ${withDoi.length} DOIs...`, 76);
+        await processDOIList(withDoi, 'bibtex', 76, 85);
+      }
+    }
+
+    // ── 5. Affiliation backfill (DOI-based) ──
+    let missingCount = Object.values(authorDB).filter(a => !a.institution).length;
+    if (missingCount > 0 && allDOIs.size > 0) {
+      showStatus(`Enriching affiliations (${missingCount} missing)...`, 86);
+      await openalexBackfillAffiliations(allDOIs, (done, total) => {
+        showStatus(`Enriching affiliations: ${done}/${total} DOIs...`, 86 + (done/total)*7);
+      });
+    }
+
+    // ── 6. Affiliation backfill (author search) ──
+    missingCount = Object.values(authorDB).filter(a => !a.institution).length;
+    if (missingCount > 0) {
+      showStatus(`Looking up ${missingCount} author affiliations...`, 93);
+      await openalexAuthorBackfill((done, total) => {
+        showStatus(`Author lookup: ${done}/${total}...`, 93 + (done/total)*6);
+      });
+    }
+
+    finalize();
+  } catch (e) { showError(e.message); hideStatus(); } finally { btn.disabled = false; }
+}
+
+// ════════════════ Publication recording ════════════════
+function addPublication(title, year, doi, authorsStr, source) {
+  publicationList.push({ title: title || '', year: year || 0, doi: doi || '', authors: authorsStr || '', source: source || '' });
+}
+
+// ════════════════ CrossRef batch ════════════════
+async function processDOIList(items, source, pctStart, pctEnd, minYear) {
+  let done = 0, failed = 0;
+  for (const item of items) {
+    try {
+      const cr = await crossrefAuthors(item.doi);
+      if (cr) {
+        const year = item.year || cr.year || 0;
+        if (minYear && year > 0 && year < minYear) { done++; continue; }
+        const authorNames = cr.authors.map(a => `${a.given||''} ${a.family||''}`.trim()).join(', ');
+        addPublication(cr.title || item.title || '', year, item.doi, authorNames, source);
+        for (const author of cr.authors) {
+          const family = author.family||'', given = author.given||'';
+          if (!family) continue;
+          const affs = (author.affiliation||[]).map(a => a.name).filter(Boolean);
+          const best = affs.length > 0 ? affs.reduce((a,b) => a.length>b.length?a:b) : '';
+          mergeAuthor(given, family, cleanAffiliation(best), year, source, 'crossref', 'crossref');
+        }
+      } else { failed++; }
+    } catch (e) { failed++; }
+    done++;
+    showStatus(`CrossRef: ${done}/${items.length}${failed?` (${failed} failed)`:''}...`, pctStart+(done/items.length)*(pctEnd-pctStart));
+    if (done < items.length) await new Promise(r => setTimeout(r, 250));
+  }
+}
+
+// ════════════════ Finalize & render ════════════════
+function getUncertainFlags(a) {
+  const flags = [];
+  if (!a.institution) flags.push('no-affiliation');
+  // Abbreviated name: given name stripped of dots/spaces is <=2 chars (just initials)
+  const cleanGiven = (a.given || '').replace(/[.\s-]/g, '');
+  if (cleanGiven.length <= 2 && cleanGiven.length > 0) flags.push('abbrev-name');
+  if (!a.given) flags.push('abbrev-name');
+  // Only found via GS fallback (not confirmed via CrossRef)
+  if (a.matchType === 'gs-fallback') flags.push('gs-fallback');
+  return flags;
+}
+
+function finalize() {
+  coauthorList = Object.values(authorDB).map(a => {
+    const flags = getUncertainFlags(a);
+    return {
+      lastName:a.family, firstName:a.given, institution:a.institution,
+      lastYear:a.lastYear, paperCount:a.paperCount, sources:[...a.sources],
+      flags
+    };
+  });
+  coauthorList.sort((a,b) => a.lastName.localeCompare(b.lastName)||a.firstName.localeCompare(b.firstName));
+  const uncertainCount = coauthorList.filter(c => c.flags.length > 0).length;
+  showStatus(`Done! ${coauthorList.length} coauthors from ${totalPapers} papers.`, 100);
+  let statsText = `${coauthorList.length} unique coauthors from ${totalPapers} papers`;
+  if (uncertainCount > 0) statsText += ` • ${uncertainCount} need review`;
+  document.getElementById('results-stats').textContent = statsText;
+  document.getElementById('results-section').style.display = 'block';
+  document.getElementById('disclaimer').style.display = 'block';
+  renderTable();
+  renderPubTable();
+  if (publicationList.length > 0) document.getElementById('pub-panel').style.display = 'block';
+  setTimeout(hideStatus, 2500);
+}
+function clearResults() {
+  for (const k in authorDB) delete authorDB[k];
+  ownerKeys.clear(); allDOIs.clear(); coauthorList = []; totalPapers = 0;
+  publicationList.length = 0;
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('disclaimer').style.display = 'none';
+  document.getElementById('doe-preview').classList.remove('active');
+  document.getElementById('pub-panel').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'block';
+}
+
+// ════════════════ Table ════════════════
+function renderTable() {
+  const sorted = [...coauthorList]; const {col,asc} = currentSort;
+  sorted.sort((a,b) => {
+    let va,vb;
+    switch(col){
+      case 0:return 0;
+      case 1:va=a.lastName.toLowerCase();vb=b.lastName.toLowerCase();break;
+      case 2:va=a.firstName.toLowerCase();vb=b.firstName.toLowerCase();break;
+      case 3:va=a.institution.toLowerCase();vb=b.institution.toLowerCase();break;
+      case 4:va=a.lastYear;vb=b.lastYear;break;
+      case 5:va=a.paperCount;vb=b.paperCount;break;
+      case 6:va=a.sources.join(',');vb=b.sources.join(',');break;
+      default:return 0;
+    }
+    return va<vb?(asc?-1:1):va>vb?(asc?1:-1):0;
+  });
+  const badge = s => {const c={orcid:'src-orcid',scholar:'src-scholar',doi:'src-doi',bibtex:'src-bibtex'};return `<span class="src-badge ${c[s]||''}">${esc(s)}</span>`;};
+  document.getElementById('results-body').innerHTML = sorted.map((c,i) => {
+    const isUncertain = c.flags.length > 0;
+    const rowCls = isUncertain ? ' class="uncertain"' : '';
+    const noAff = c.flags.includes('no-affiliation');
+    const abbrev = c.flags.includes('abbrev-name');
+    const gsFallback = c.flags.includes('gs-fallback');
+    // Build tooltip for uncertain items
+    const tips = [];
+    if (noAff) tips.push('Missing affiliation');
+    if (abbrev) tips.push('Abbreviated name (initials only)');
+    if (gsFallback) tips.push('Not verified via CrossRef');
+    const tipAttr = tips.length ? ` title="${esc(tips.join('; '))}"` : '';
+    const instCls = noAff ? ' class="cell-missing"' : '';
+    const nameCls = abbrev ? ' class="cell-warn"' : '';
+    const instText = c.institution || '—';
+    return `<tr${rowCls}${tipAttr}>
+      <td>${i+1}</td><td${nameCls}>${esc(c.lastName)}</td><td${nameCls}>${esc(c.firstName)}</td>
+      <td${instCls}>${esc(instText)}</td><td>${c.lastYear||'—'}</td>
+      <td>${c.paperCount}</td><td>${c.sources.map(badge).join('')}</td></tr>`;
+  }).join('');
+  for (let i=0;i<7;i++){const ar=document.getElementById('sort-'+i);ar.className='sort-arrow';if(i===col)ar.classList.add(asc?'asc':'desc');}
+
+  // Show legend if there are uncertain entries
+  let legend = document.getElementById('uncertain-legend');
+  const hasUncertain = coauthorList.some(c => c.flags.length > 0);
+  if (hasUncertain) {
+    if (!legend) {
+      legend = document.createElement('div');
+      legend.id = 'uncertain-legend';
+      legend.className = 'uncertain-legend';
+      document.querySelector('.table-wrap').after(legend);
+    }
+    const counts = {
+      'no-affiliation': coauthorList.filter(c => c.flags.includes('no-affiliation')).length,
+      'abbrev-name': coauthorList.filter(c => c.flags.includes('abbrev-name')).length,
+      'gs-fallback': coauthorList.filter(c => c.flags.includes('gs-fallback')).length
+    };
+    const parts = [];
+    parts.push(`<span><span class="swatch" style="background:#fffbeb;border:1px solid #fde68a"></span>Highlighted rows need review</span>`);
+    if (counts['no-affiliation']) parts.push(`<span>${counts['no-affiliation']} missing affiliation</span>`);
+    if (counts['abbrev-name']) parts.push(`<span>${counts['abbrev-name']} abbreviated names</span>`);
+    if (counts['gs-fallback']) parts.push(`<span>${counts['gs-fallback']} unverified (GS only)</span>`);
+    legend.innerHTML = parts.join('');
+    legend.style.display = 'flex';
+  } else if (legend) {
+    legend.style.display = 'none';
+  }
+}
+function sortTable(col){if(currentSort.col===col)currentSort.asc=!currentSort.asc;else currentSort={col,asc:true};renderTable();}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+// ════════════════ Downloads ════════════════
+function downloadCSV(){
+  const h='Last Name,First Name,Institution,Last Publication Year,Joint Papers,Sources\n';
+  const r=coauthorList.map(c=>[c.lastName,c.firstName,`"${(c.institution||'').replace(/"/g,'""')}"`,c.lastYear,c.paperCount,`"${c.sources.join(', ')}"`].join(',')).join('\n');
+  dl(h+r,'coauthors.csv','text/csv');
+}
+function generateDOEText(){
+  return [...coauthorList].sort((a,b)=>a.lastName.localeCompare(b.lastName)||a.firstName.localeCompare(b.firstName))
+    .map(c=>`${c.lastName}, ${c.firstName} (${c.institution||'Affiliation Unknown'})`).join('\n');
+}
+function toggleDOEPreview(){const p=document.getElementById('doe-preview');if(p.classList.contains('active')){p.classList.remove('active');return;}document.getElementById('doe-text').textContent=generateDOEText();p.classList.add('active');}
+function copyDOEText(){navigator.clipboard.writeText(generateDOEText()).then(()=>{const b=event.target;const o=b.textContent;b.textContent='Copied!';setTimeout(()=>b.textContent=o,1500);});}
+function downloadDOEText(){dl(generateDOEText(),'collaborators_list.txt','text/plain');}
+function dl(c,n,t){const u=URL.createObjectURL(new Blob([c],{type:t}));const a=Object.assign(document.createElement('a'),{href:u,download:n});document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}
+
+// ════════════════ Publications table ════════════════
+function renderPubTable() {
+  const sorted = [...publicationList];
+  const {col, asc} = pubSort;
+  sorted.sort((a,b) => {
+    let va, vb;
+    switch(col) {
+      case 0: return 0;
+      case 1: va=a.title.toLowerCase(); vb=b.title.toLowerCase(); break;
+      case 2: va=a.year; vb=b.year; break;
+      case 3: va=a.authors.toLowerCase(); vb=b.authors.toLowerCase(); break;
+      case 4: va=a.doi.toLowerCase(); vb=b.doi.toLowerCase(); break;
+      case 5: va=a.source; vb=b.source; break;
+      default: return 0;
+    }
+    return va<vb?(asc?-1:1):va>vb?(asc?1:-1):0;
+  });
+  const badge = s => {const c={orcid:'src-orcid',scholar:'src-scholar',doi:'src-doi',bibtex:'src-bibtex'};return `<span class="src-badge ${c[s]||''}">${esc(s)}</span>`;};
+  document.getElementById('pub-body').innerHTML = sorted.map((p,i) => {
+    const doiCell = p.doi ? `<a class="pub-doi-link" href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">${esc(p.doi)}</a>` : '—';
+    return `<tr>
+      <td>${i+1}</td>
+      <td class="pub-title">${esc(p.title || '—')}</td>
+      <td>${p.year || '—'}</td>
+      <td class="pub-authors">${esc(p.authors || '—')}</td>
+      <td>${doiCell}</td>
+      <td>${badge(p.source)}</td></tr>`;
+  }).join('');
+  document.getElementById('pub-stats').textContent = `${publicationList.length} publications fetched`;
+  for (let i=0;i<6;i++){const ar=document.getElementById('psort-'+i);if(ar){ar.className='sort-arrow';if(i===col)ar.classList.add(asc?'asc':'desc');}}
+}
+function sortPubTable(col){if(pubSort.col===col)pubSort.asc=!pubSort.asc;else pubSort={col,asc:col===2?false:true};renderPubTable();}
+function collapsePubPanel(){document.getElementById('pub-panel').style.display='none';}
+function downloadPubCSV(){
+  const h='Title,Year,Authors,DOI,Source\n';
+  const r=publicationList.map(p=>[`"${(p.title||'').replace(/"/g,'""')}"`,p.year||'',`"${(p.authors||'').replace(/"/g,'""')}"`,p.doi||'',p.source].join(',')).join('\n');
+  dl(h+r,'publications.csv','text/csv');
+}
+
+// ════════════════ UI helpers ════════════════
+function showStatus(t,p){document.getElementById('status-bar').classList.add('active');document.getElementById('status-text').textContent=t;document.getElementById('progress-fill').style.width=p+'%';}
+function hideStatus(){document.getElementById('status-bar').classList.remove('active');}
+function showError(m){const e=document.getElementById('error-msg');e.textContent=m;e.classList.add('active');}
+function hideError(){document.getElementById('error-msg').classList.remove('active');}
+
+// Enter key shortcuts
+document.getElementById('orcid-input').addEventListener('keydown',e=>{if(e.key==='Enter')runFetch();});
+document.getElementById('scholar-input').addEventListener('keydown',e=>{if(e.key==='Enter')runFetch();});
+</script>
+</body>
+</html>
