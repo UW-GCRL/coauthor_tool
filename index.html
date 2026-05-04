@@ -528,7 +528,7 @@
         Output is derived from third-party public APIs (ORCID, CrossRef, OpenAlex, Google Scholar) and may contain
         inaccuracies, omissions, or errors — including incorrect author names, institutional affiliations, duplicate
         entries, or missing collaborators.
-        <strong>The developer, the University of Wisconsin–Madison, and the Global Change and Agroecosystems Research Lab
+        <strong>The University of Wisconsin–Madison and the Global Change Research Lab
         accept no responsibility or liability</strong> for the accuracy, completeness, or fitness for purpose of the output,
         nor for any decisions, submissions, or consequences arising from its use.
         Users are solely responsible for independently reviewing and verifying all information before inclusion in any
@@ -1023,7 +1023,7 @@ async function runFetch() {
   document.getElementById('results-section').style.display = 'none';
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('disclaimer').style.display = 'none';
-  document.getElementById('doe-preview').classList.remove('active');
+  document.getElementById('doe-preview').style.display='none';
 
   for (const k in authorDB) delete authorDB[k];
   allDOIs.clear();
@@ -1237,7 +1237,7 @@ function clearResults() {
   publicationList.length = 0;
   document.getElementById('results-section').style.display = 'none';
   document.getElementById('disclaimer').style.display = 'none';
-  document.getElementById('doe-preview').classList.remove('active');
+  document.getElementById('doe-preview').style.display='none';
   document.getElementById('pub-panel').style.display = 'none';
   document.getElementById('empty-state').style.display = 'block';
 }
@@ -1321,7 +1321,13 @@ function generateDOEText(){
   return [...coauthorList].sort((a,b)=>a.lastName.localeCompare(b.lastName)||a.firstName.localeCompare(b.firstName))
     .map(c=>`${c.lastName}, ${c.firstName} (${c.institution||'Affiliation Unknown'})`).join('\n');
 }
-function toggleDOEPreview(){const p=document.getElementById('doe-preview');if(p.classList.contains('active')){p.classList.remove('active');return;}document.getElementById('doe-text').textContent=generateDOEText();p.classList.add('active');}
+function toggleDOEPreview(){
+  const p=document.getElementById('doe-preview');
+  if(p.style.display==='block'){p.style.display='none';return;}
+  document.getElementById('doe-text').textContent=generateDOEText();
+  p.style.display='block';
+  p.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function copyDOEText(){navigator.clipboard.writeText(generateDOEText()).then(()=>{const b=event.target;const o=b.textContent;b.textContent='Copied!';setTimeout(()=>b.textContent=o,1500);});}
 function downloadDOEText(){dl(generateDOEText(),'collaborators_list.txt','text/plain');}
 function dl(c,n,t){const u=URL.createObjectURL(new Blob([c],{type:t}));const a=Object.assign(document.createElement('a'),{href:u,download:n});document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}
