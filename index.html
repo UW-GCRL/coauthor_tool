@@ -468,7 +468,12 @@
 
       <div class="notice-box">
         <span class="notice-box-icon">⚠️</span>
-        <span><strong>For informational use only.</strong> Output is derived from public APIs and may be incomplete or inaccurate. You are solely responsible for verifying all results before submitting to any funding agency or official document. The developer assumes no liability for errors or omissions.</span>
+        <div>
+          <strong>For informational use only.</strong> Always verify results before submitting to any funding agency.<br>
+          <strong>Data privacy:</strong> Your inputs are sent to public academic APIs (ORCID, CrossRef, OpenAlex).
+          Google Scholar lookups are additionally routed through third-party CORS proxies (allorigins.win, codetabs.com) — avoid Scholar if your publication list is sensitive.
+          No data is stored by this tool itself.
+        </div>
       </div>
     </div>
 
@@ -528,6 +533,9 @@
         Output is derived from third-party public APIs (ORCID, CrossRef, OpenAlex, Google Scholar) and may contain
         inaccuracies, omissions, or errors — including incorrect author names, institutional affiliations, duplicate
         entries, or missing collaborators.
+        Input data (ORCID iDs, DOIs, author names) is transmitted to these external APIs to retrieve results;
+        Google Scholar lookups are additionally relayed through third-party CORS proxy services.
+        This tool does not store, log, or transmit your data beyond what is required for these API calls.
         <strong>The University of Wisconsin–Madison and the Global Change Research Lab
         accept no responsibility or liability</strong> for the accuracy, completeness, or fitness for purpose of the output,
         nor for any decisions, submissions, or consequences arising from its use.
